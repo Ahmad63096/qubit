@@ -427,12 +427,10 @@ function Chatbot({title}) {
     }, [isChatOpen,]);
     return (
         <>
-        <div className='nav-wrap'>
+        {/* <div className='nav-wrap'>
             <a href="/">Qubit</a>
             <a href="/ecommerce">Qubit commerce</a>
-            {/* <Link to='/'>chatbot</Link>
-            <Link to='/ecommerce'>ecommerce</Link> */}
-        </div>
+        </div> */}
             <div className={`floating-chat`} ref={chatRef} draggable="false">
                 <img id='comments' src={homeicon} alt="" aria-hidden="true" onClick={openElement} style={{ width: '40px', height: 'auto' }} />
                 {showAnimation && (

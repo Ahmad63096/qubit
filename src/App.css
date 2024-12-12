@@ -11,10 +11,11 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #e8e0cd;
+  /* background-color: #e8e0cd; */
   /* background-image: url('./assets/img/background.png');
   background-repeat: no-repeat;
   background-size: cover; */
+  background: transparent !important;
   font-family: 'CustomFont', sans-serif;
 }
 
