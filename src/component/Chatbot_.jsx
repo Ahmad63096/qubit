@@ -6,12 +6,14 @@ import homeicon from '../assets/img/homeicon.png';
 import Home from './Home';
 import Chat from './Chat';
 import Rating from './Rating';
+// import { Link } from 'react-router-dom';
 import Animation from './Animation';
 import EmojiPicker from 'emoji-picker-react';
 import parse from 'html-react-parser';
 import { cleanHTML } from './sanitizeHTML';
+// const backgroundImage = require('../assets/img/background.png');
 
-function Chatbot({ title }) {
+function Chatbot({title}) {
     const chatRef = useRef(null);
     const [loading, setLoading] = useState(false);
     const [messages, setMessages] = useState([]);
@@ -45,18 +47,24 @@ function Chatbot({ title }) {
     }
     const visitorTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const visitorCurrentTime = new Date().toLocaleString("en-US", { timeZone: visitorTimeZone });
+    // Function to fetch the visitor's IP address
     async function getVisitorIp() {
         try {
+            // Fetch the IP address from ipify API
             const response = await fetch("https://api.ipify.org?format=json");
+
+            // Check if the response is OK (status code 200)
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
+
+            // Parse the JSON response to get the IP address
             const data = await response.json();
             return data.ip;
 
         } catch (error) {
             console.error("Error fetching IP address:", error);
-            return null;
+            return null;  // Return null in case of an error
         }
     }
 
@@ -106,6 +114,8 @@ function Chatbot({ title }) {
         element.on('click', openElement);
 
         const messagesArea = element.find('.messages');
+
+        // Attach activity listeners
         const handleUserActivity = () => {
             resetInactivityTimers();
         };
@@ -115,14 +125,22 @@ function Chatbot({ title }) {
         messagesArea.on('keydown', handleUserActivity);
 
         return () => {
+            // element.off('click', openElement);
+            // messagesArea.off('mouseenter');
+            // messagesArea.off('mouseleave');
             messagesArea.off('click', handleUserActivity);
             messagesArea.off('input', handleUserActivity);
             messagesArea.off('keydown', handleUserActivity);
+            // clearTimeout(timer);
+            // clearInactivityTimers();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading, isChatOpen]);
 
     useEffect(() => {
+        // document.body.style.backgroundImage = `url(${backgroundImage})`;
+        // document.body.style.backgroundSize = 'cover';
+        // document.body.style.backgroundRepeat = 'no-repeat';
         if (messages.length > 0) {
             const messagesContainer = chatRef.current.querySelector('.messages');
             if (messagesContainer) {
@@ -177,45 +195,15 @@ function Chatbot({ title }) {
                 let newMessages = [];
 
                 if (mainResponse.trim()) {
-                    const sentences = mainResponse.match(/[^.!?]+[.!?]+/g) || [mainResponse]; // 
-                    let currentChunk = '';
-                    sentences.forEach(sentence => {
-                        if ((currentChunk + sentence).length <= 100) {
-                            currentChunk += sentence;
-                        } else {
-                            if (currentChunk.trim()) {
-                                newMessages.push({
-                                    type: 'other',
-                                    content: currentChunk.trim(),
-                                    replyTime,
-                                });
-                            }
-                            currentChunk = sentence;
-                        }
-                    });
-                    if (currentChunk.trim()) {
-                        newMessages.push({
-                            type: 'other',
-                            content: currentChunk.trim(),
-                            replyTime,
-                        });
-                    }
+                    newMessages.push({ type: 'other', content: mainResponse, replyTime });
                 }
 
                 if (questionResponse.trim()) {
-                    newMessages.push({
-                        type: 'other',
-                        content: questionResponse.trim(),
-                        replyTime,
-                    });
+                    newMessages.push({ type: 'other', content: questionResponse, replyTime });
                 }
 
                 if (feedback_form === 1) {
-                    newMessages.push({
-                        type: 'other',
-                        content: 'rating',
-                        replyTime,
-                    });
+                    newMessages.push({ type: 'other', content: 'rating', replyTime });
                 }
 
                 if (newMessages.length > 0) {
@@ -225,35 +213,6 @@ function Chatbot({ title }) {
                     }
                 }
             })
-            // .then(data => {
-            //     setLoading(false);
-            //     console.log('response data', data);
-            //     const replyTime = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-
-            //     const mainResponse = data.main_response || '';
-            //     const questionResponse = data.follow_up_question || '';
-            //     const feedback_form = data.feedback_form;
-            //     let newMessages = [];
-
-            //     if (mainResponse.trim()) {
-            //         newMessages.push({ type: 'other', content: mainResponse, replyTime });
-            //     }
-
-            //     if (questionResponse.trim()) {
-            //         newMessages.push({ type: 'other', content: questionResponse, replyTime });
-            //     }
-
-            //     if (feedback_form === 1) {
-            //         newMessages.push({ type: 'other', content: 'rating', replyTime });
-            //     }
-
-            //     if (newMessages.length > 0) {
-            //         messageQueue.current = [...messageQueue.current, ...newMessages];
-            //         if (!isProcessingQueueRef.current) {
-            //             processMessageQueue();
-            //         }
-            //     }
-            // })
             .catch(error => {
                 setLoading(false);
                 console.error('Error:', error);
@@ -419,6 +378,7 @@ function Chatbot({ title }) {
             }, 60000); // Additional 10 seconds
         }, 60000); // 10 seconds
     };
+
     const clearInactivityTimers = () => {
         if (inactivityTimer1Ref.current) {
             clearTimeout(inactivityTimer1Ref.current);
@@ -456,18 +416,21 @@ function Chatbot({ title }) {
     };
     useEffect(() => {
         if (isChatOpen) {
-            resetInactivityTimers(); // Start timers if chat is open
+            resetInactivityTimers();
         } else {
-            clearInactivityTimers(); // Clear timers if chat is closed
+            clearInactivityTimers();
         }
-
         return () => {
-            clearInactivityTimers(); // Clean up timers on component unmount
+            clearInactivityTimers();
         };
-        // eslint-disable-next-line
-    }, [isChatOpen]);
+        //eslint-disable-next-line
+    }, [isChatOpen,]);
     return (
         <>
+        {/* <div className='nav-wrap'>
+            <a href="/">Qubit</a>
+            <a href="/ecommerce">Qubit commerce</a>
+        </div> */}
             <div className={`floating-chat`} ref={chatRef} draggable="false">
                 <img id='comments' src={homeicon} alt="" aria-hidden="true" onClick={openElement} style={{ width: '40px', height: 'auto' }} />
                 {showAnimation && (
@@ -500,9 +463,9 @@ function Chatbot({ title }) {
                                         </div>
                                     )}
                                 </div>
-                                <span className="title">{title}
+                                <span className="title">{title} 
                                     {/* Assistant */}
-                                </span>
+                                    </span>
                                 <button onClick={closeElement}>
                                     <i className="fa fa-times" aria-hidden="true"></i>
                                 </button>
@@ -608,7 +571,7 @@ function Chatbot({ title }) {
                     )}
                     {currentPage < totalPages && (
                         <>
-                            <Home handleNext={handleNext} closeElement={closeElement} title={title} />
+                            <Home handleNext={handleNext} closeElement={closeElement} title={title}/>
                         </>
                     )}
                 </div>
