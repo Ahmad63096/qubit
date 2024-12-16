@@ -23,6 +23,7 @@ function Chatbot({ title }) {
     const [currentPage, setCurrentPage] = useState(1);
     const [showAnimation, setShowAnimation] = useState(false);
     const [showAnm, setShowAnm] = useState('');
+    const [isGreetingDisplayed, setIsGreetingDisplayed] = useState(false);
     const messageQueue = useRef([]);
     const isProcessingQueueRef = useRef(false);
     const animationCompleteRef = useRef(null);
@@ -331,30 +332,31 @@ function Chatbot({ title }) {
         .catch(error => {
             console.error("Error fetching IP address:", error);
         });
-    const handleNext = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(prev => prev + 1);
-        }
-        if (messages.length === 0) {
-            setLoading(true);
-            setTimeout(() => {
-                setLoading(false);
-                if (messages.length === 0) {
-                    const initialMessage = {
-                        type: 'other',
-                        content: greatingMessage,
-                        animated: false,
-                        replyTime: currentTime
-                    };
-                    messageQueue.current = [...messageQueue.current, initialMessage];
-                    if (!isProcessingQueueRef.current) {
-                        processMessageQueue();
+        const handleNext = () => {
+            if (currentPage < totalPages) {
+                setCurrentPage(prev => prev + 1);
+            }
+            if (messages.length === 0) {
+                setLoading(true);
+                setTimeout(() => {
+                    setLoading(false);
+                    if (messages.length === 0) {
+                        const initialMessage = {
+                            type: 'other',
+                            content: greatingMessage,
+                            animated: false,
+                            replyTime: currentTime
+                        };
+                        messageQueue.current = [...messageQueue.current, initialMessage];
+                        setIsGreetingDisplayed(true); // Mark greeting as displayed
+                        if (!isProcessingQueueRef.current) {
+                            processMessageQueue();
+                        }
                     }
-                }
-            }, 1000);
-        }
-        resetInactivityTimers();
-    };
+                }, 1000);
+            }
+            resetInactivityTimers();
+        };
     const handlePrev = () => {
         if (currentPage > 1) {
             setCurrentPage(prev => prev - 1);
@@ -416,8 +418,8 @@ function Chatbot({ title }) {
             enqueueInactivityMessage('waiting');
             inactivityTimer2Ref.current = setTimeout(() => {
                 enqueueInactivityMessage('thank you');
-            }, 60000); // Additional 10 seconds
-        }, 60000); // 10 seconds
+            }, 60000); // Additional 60 seconds
+        }, 60000); // Initial 60 seconds
     };
     const clearInactivityTimers = () => {
         if (inactivityTimer1Ref.current) {
@@ -431,6 +433,8 @@ function Chatbot({ title }) {
     };
 
     const enqueueInactivityMessage = (type) => {
+        if (!isGreetingDisplayed) return; // Skip if greeting has not been displayed
+    
         if (type === 'waiting') {
             const waitingMessage = {
                 type: 'other',
@@ -449,7 +453,7 @@ function Chatbot({ title }) {
             };
             messageQueue.current = [...messageQueue.current, thankYouMessage];
         }
-
+    
         if (!isProcessingQueueRef.current) {
             processMessageQueue();
         }
